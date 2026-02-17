@@ -162,7 +162,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """ Question 2: We prompted ChatGPT5.2. We gave it a screenshot of the 
         pseudocode from minimax from the class’s textbook from page 196. In the 
         prompt we included “we are working on the minimax search problem of 
-        pacman. We only tweaked a few variable names from the generation"""
+        pacman." We only tweaked a few variable names from the generation"""
         
         def minimax(state, agentIndex, depthRemaining):
             if state.isWin() or state.isLose() or depthRemaining == 0:
@@ -216,7 +216,65 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        """ Question 2: We prompted ChatGPT5.2. We gave it a screenshot of the 
+        question from the assignment page explaining the alpha-beta search. We
+        included “we are working on the alpha-beta search problem of 
+        pacman." We only tweaked a few variable names from the generation"""
+
+        def value(state, agentIndex, depthRemaining, alpha, beta):
+            # Terminal / cutoff
+            if state.isWin() or state.isLose() or depthRemaining == 0:
+                return self.evaluationFunction(state)
+
+            # if 0, pacman! max node
+            if agentIndex == 0:
+                v = float("-inf")
+                for action in state.getLegalActions(0):  # do NOT reorder
+                    succ = state.generateSuccessor(0, action)
+                    v = max(v, value(succ, 1, depthRemaining, alpha, beta))
+
+                    # prune
+                    if v > beta:
+                        return v
+                    alpha = max(alpha, v)
+                return v
+
+            # else is ghost, min nodes
+            else:
+                v = float("inf")
+                for action in state.getLegalActions(agentIndex):  # do NOT reorder
+                    succ = state.generateSuccessor(agentIndex, action)
+
+                    nextAgent = agentIndex + 1
+                    nextDepth = depthRemaining
+                    if nextAgent == gameState.getNumAgents():
+                        nextAgent = 0
+                        nextDepth -= 1
+
+                    v = min(v, value(succ, nextAgent, nextDepth, alpha, beta))
+
+                    # prune
+                    if v < alpha:
+                        return v
+                    beta = min(beta, v)
+                return v
+            
+        bestAction = None
+        alpha = float("-inf")
+        beta = float("inf")
+        bestVal = float("-inf")
+
+        for action in gameState.getLegalActions(0):  
+            succ = gameState.generateSuccessor(0, action)
+            v = value(succ, 1, self.depth, alpha, beta)
+
+            if v > bestVal:
+                bestVal = v
+                bestAction = action
+            alpha = max(alpha, bestVal)
+        return bestAction
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
