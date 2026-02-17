@@ -141,24 +141,64 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         Here are some method calls that might be useful when implementing minimax.
 
-        gameState.getLegalActions(agentIndex):
-        Returns a list of legal actions for an agent
-        agentIndex=0 means Pacman, ghosts are >= 1
 
-        gameState.generateSuccessor(agentIndex, action):
-        Returns the successor game state after an agent takes an action
-
-        gameState.getNumAgents():
-        Returns the total number of agents in the game
-
-        gameState.isWin():
-        Returns whether or not the game state is a winning state
-
-        gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # gameState.getLegalActions(agentIndex):
+        # # Returns a list of legal actions for an agent
+        # agentIndex=0 means Pacman, ghosts are >= 1
+
+        # gameState.generateSuccessor(agentIndex, action):
+        # # Returns the successor game state after an agent takes an action
+
+        # gameState.getNumAgents():
+        # # Returns the total number of agents in the game
+
+        # gameState.isWin():
+        # # Returns whether or not the game state is a winning state
+
+        # gameState.isLose():
+        def minimax(state, agentIndex, depthRemaining):
+            if state.isWin() or state.isLose() or depthRemaining == 0:
+                return self.evaluationFunction(state)
+
+    
+            # if its pacman! then
+            if agentIndex == 0:
+                bestVal = float("-inf")
+                for action in state.getLegalActions(0):
+                    succ = state.generateSuccessor(0, action)
+                    val = minimax(succ, 1, depthRemaining)
+                    bestVal = max(bestVal, val)
+                return bestVal
+
+            # is a ghost    
+            else:
+                bestVal = float("inf")
+                for action in state.getLegalActions(agentIndex):
+                    succ = state.generateSuccessor(agentIndex, action)
+
+                    nextAgent = agentIndex + 1
+                    nextDepth = depthRemaining
+
+                    # If last ghost moved, go back to Pacman and consume 1 depth
+                    if nextAgent == gameState.getNumAgents():
+                        nextAgent = 0
+                        nextDepth -= 1
+
+                    val = minimax(succ, nextAgent, nextDepth)
+                    bestVal = min(bestVal, val)
+                return bestVal
+
+        bestAction = None
+        bestVal = float("-inf")
+        for action in gameState.getLegalActions(0):
+            succ = gameState.generateSuccessor(0, action)
+            val = minimax(succ, 1, self.depth)
+            if val > bestVal:
+                bestVal = val
+                bestAction = action
+        return bestAction
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
