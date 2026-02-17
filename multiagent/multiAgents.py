@@ -158,6 +158,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # # Returns whether or not the game state is a winning state
 
         # gameState.isLose():
+
+        """ Question 2: We prompted ChatGPT5.2. We gave it a screenshot of the 
+        pseudocode from minimax from the class’s textbook from page 196. In the 
+        prompt we included “we are working on the minimax search problem of 
+        pacman. We only tweaked a few variable names from the generation"""
+        
         def minimax(state, agentIndex, depthRemaining):
             if state.isWin() or state.isLose() or depthRemaining == 0:
                 return self.evaluationFunction(state)
