@@ -289,6 +289,10 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
 
+        """ Question 2: We prompted ChatGPT5.2. We gave it the problem
+        description and the function header. We only tweaked a few 
+        variable names from the generation"""
+
         def expectimax(state, depth, agentIndex):
             # Terminal test
             if depth == self.depth or state.isWin() or state.isLose():
@@ -337,15 +341,80 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
         return bestAction
 
-def betterEvaluationFunction(currentGameState: GameState):
-    """
-    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-    evaluation function (question 5).
+# def betterEvaluationFunction(currentGameState: GameState):
+#     """
+#     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+#     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+#     DESCRIPTION: <write something here so we know what you did>
+#     """
+#     "*** YOUR CODE HERE ***"
+#     util.raiseNotDefined()
+
+def betterEvaluationFunction(currentGameState):
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A better evaluation function for Pacman.
+    Scores states (not actions). Higher is better.
+    """
+    """ Question 2: We prompted ChatGPT5.2. We gave it a screenshot of the 
+        question from the assignment page explaining the Evaluation Function. We
+        included “we are working on the new evaluation function of 
+        pacman." We only tweaked a few variable names from the generation"""
+    
+    # Terminal states
+    if currentGameState.isWin():
+        return float("inf")
+    if currentGameState.isLose():
+        return float("-inf")
+
+    pos = currentGameState.getPacmanPosition()
+    foodGrid = currentGameState.getFood()
+    foodList = foodGrid.asList()
+    ghostStates = currentGameState.getGhostStates()
+    capsules = currentGameState.getCapsules()
+
+    score = currentGameState.getScore()
+
+    # ---------- FOOD FEATURES ----------
+    # Prefer fewer remaining food
+    score -= 4.0 * len(foodList)
+
+    # Prefer being closer to the nearest food
+    if foodList:
+        dists = [abs(pos[0]-fx) + abs(pos[1]-fy) for (fx, fy) in foodList]
+        nearestFood = min(dists)
+        # closer => bigger bonus (avoid division by 0)
+        score += 10.0 / (nearestFood + 1.0)
+
+    # ---------- CAPSULE FEATURES ----------
+    # Small bonus for fewer capsules left
+    score -= 15.0 * len(capsules)
+    if capsules:
+        capDists = [abs(pos[0]-cx) + abs(pos[1]-cy) for (cx, cy) in capsules]
+        nearestCap = min(capDists)
+        # encourage approaching capsules a bit (especially helpful vs ghosts)
+        score += 3.0 / (nearestCap + 1.0)
+
+    # ---------- GHOST FEATURES ----------
+    for g in ghostStates:
+        gpos = g.getPosition()
+        dist = abs(pos[0]-gpos[0]) + abs(pos[1]-gpos[1])
+
+        if g.scaredTimer > 0:
+            # scared ghosts are opportunities: closer is better
+            score += 20.0 / (dist + 1.0)
+        else:
+            # active ghosts are dangerous: very steep penalty when close
+            if dist <= 1:
+                score -= 500.0
+            elif dist <= 2:
+                score -= 200.0
+            else:
+                # mild penalty for being somewhat near
+                score -= 2.0 / dist
+
+    return score
+
 
 # Abbreviation
 better = betterEvaluationFunction
